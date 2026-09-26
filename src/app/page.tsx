@@ -15,7 +15,10 @@ export default function Home() {
           <p className="mt-2 text-sm text-gray-500">ລະບົບຕິດຕາມວຽກ WorkTracker</p>
         </div>
         
-        <form action={login} className="mt-8 space-y-6">
+        <form action={async (formData: FormData) => {
+          'use server'
+          await login(formData)
+        }} className="mt-8 space-y-6">
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">ອີເມວ (Email)</label>

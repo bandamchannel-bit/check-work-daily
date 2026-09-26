@@ -63,6 +63,7 @@ type Task = {
   dueDate: string | Date
   status: string
   proofUrl?: string | null
+  completedAt?: string | Date | null
   userId: string
   platformId: string
   user: {

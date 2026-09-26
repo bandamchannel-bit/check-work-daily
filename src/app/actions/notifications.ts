@@ -5,7 +5,7 @@ import { getSession } from './auth'
 
 export async function getMyNotifications() {
   const session = await getSession()
-  if (!session) return []
+  if (!session || !session.userId) return []
 
   const notifications = await prisma.notification.findMany({
     where: { userId: session.userId },
@@ -21,7 +21,7 @@ export async function getMyNotifications() {
 
 export async function markNotificationAsRead(id: string) {
   const session = await getSession()
-  if (!session) return
+  if (!session || !session.userId) return
 
   await prisma.notification.update({
     where: { id, userId: session.userId }, // Ensure they only mark their own
@@ -31,7 +31,7 @@ export async function markNotificationAsRead(id: string) {
 
 export async function markAllNotificationsAsRead() {
   const session = await getSession()
-  if (!session) return
+  if (!session || !session.userId) return
 
   await prisma.notification.updateMany({
     where: { userId: session.userId, isRead: false },

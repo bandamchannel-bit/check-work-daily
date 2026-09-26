@@ -30,7 +30,10 @@ export default async function EditAutoTaskPage({ params }: { params: Promise<{ i
       </div>
 
       <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6 max-w-2xl">
-        <form action={updateAutoTask} className="space-y-6">
+        <form action={async (formData: FormData) => {
+          'use server'
+          await updateAutoTask(formData)
+        }} className="space-y-6">
           <input type="hidden" name="id" value={config.id} />
           
           <div>

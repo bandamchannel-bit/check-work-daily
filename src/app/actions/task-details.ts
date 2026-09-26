@@ -46,7 +46,7 @@ export async function deleteSubTask(subTaskId: string) {
 
 export async function addComment(taskId: string, content: string) {
   const session = await getSession()
-  if (!session) throw new Error('Unauthorized')
+  if (!session || !session.userId) throw new Error('Unauthorized')
 
   await prisma.comment.create({
     data: {
@@ -76,7 +76,7 @@ export async function deleteComment(commentId: string) {
 
 export async function addAttachment(taskId: string, fileName: string, fileUrl: string) {
   const session = await getSession()
-  if (!session) throw new Error('Unauthorized')
+  if (!session || !session.userId) throw new Error('Unauthorized')
 
   await prisma.attachment.create({
     data: {

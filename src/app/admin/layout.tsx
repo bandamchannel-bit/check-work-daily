@@ -14,11 +14,11 @@ export default async function AdminLayout({
     redirect('/')
   }
 
-  const user = await prisma.user.findUnique({ where: { id: session.userId } })
+  const user = session?.userId ? await prisma.user.findUnique({ where: { id: session.userId } }) : null
 
   return (
     <div className="flex min-h-screen bg-gray-50/50">
-      <Sidebar role={session.userRole} userEmail={user?.email} userName={user?.name} />
+      <Sidebar role={session.userRole} userEmail={user?.email || undefined} userName={user?.name || undefined} />
       <div className="flex-1 md:ml-64 flex flex-col min-w-0 min-h-screen">
         {/* Main Content */}
         <main className="flex-1 py-14 md:py-6 px-3 sm:px-5 md:px-6 w-full max-w-[1680px] mx-auto min-w-0">

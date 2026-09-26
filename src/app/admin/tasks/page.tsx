@@ -70,7 +70,7 @@ export default async function AdminTasksPage() {
       initialTasks={serializedTasks}
       initialPlatforms={serializedPlatforms}
       initialUsers={users}
-      currentUserId={session.userId}
+      currentUserId={session.userId || ''}
     />
   )
 }

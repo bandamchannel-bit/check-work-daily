@@ -17,14 +17,14 @@ export default async function EmployeeDashboard({
     ? await prisma.user.findMany({ where: { role: 'USER' }, orderBy: { name: 'asc' } })
     : []
 
-  const targetUserId = (isAdmin && resolvedSearchParams.userId)
+  const targetUserId: string = (isAdmin && resolvedSearchParams.userId)
     ? resolvedSearchParams.userId
-    : (isAdmin && employees.length > 0 ? employees[0].id : session.userId)
+    : (isAdmin && employees.length > 0 ? employees[0].id : (session.userId || ''))
 
   const activeEmployee = isAdmin ? employees.find(e => e.id === targetUserId) : null
 
   // Fetch logged-in user's name
-  const me = await prisma.user.findUnique({ where: { id: session.userId }, select: { name: true } })
+  const me = session?.userId ? await prisma.user.findUnique({ where: { id: session.userId }, select: { name: true } }) : null
 
   const myTasks = await prisma.task.findMany({
     where: {
@@ -45,7 +45,7 @@ export default async function EmployeeDashboard({
   })
 
   // Serialize dates
-  const serializedTasks = myTasks.map(t => ({
+  const serializedTasks = myTasks.map((t: any) => ({
     id: t.id,
     title: t.title,
     description: t.description,
@@ -65,19 +65,19 @@ export default async function EmployeeDashboard({
       id: t.project.id,
       name: t.project.name,
     } : null,
-    subTasks: t.subTasks.map(st => ({
+    subTasks: (t.subTasks || []).map((st: any) => ({
       id: st.id,
       title: st.title,
       isCompleted: st.isCompleted,
     })),
-    comments: t.comments.map(c => ({
+    comments: (t.comments || []).map((c: any) => ({
       id: c.id,
       content: c.content,
       userId: c.userId,
       createdAt: c.createdAt.toISOString(),
       user: c.user,
     })),
-    attachments: t.attachments.map(a => ({
+    attachments: (t.attachments || []).map((a: any) => ({
       id: a.id,
       fileName: a.fileName,
       fileUrl: a.fileUrl,
@@ -93,7 +93,7 @@ export default async function EmployeeDashboard({
       employees={employees.map(e => ({ id: e.id, name: e.name }))}
       targetUserId={targetUserId}
       activeEmployeeName={activeEmployee?.name ?? null}
-      currentUserId={session.userId}
+      currentUserId={session.userId || ''}
     />
   )
 }

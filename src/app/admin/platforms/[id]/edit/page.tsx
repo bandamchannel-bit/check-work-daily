@@ -29,7 +29,10 @@ export default async function EditPlatformPage({ params }: { params: Promise<{ i
       </div>
 
       <div className="bg-white shadow-sm border border-gray-100 rounded-xl p-8">
-        <form action={updatePlatformWithId} className="space-y-6">
+        <form action={async (formData: FormData) => {
+          'use server'
+          await updatePlatformWithId(formData)
+        }} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">ຊື່ເພຈ / ຊື່ຊ່ອງ (Page Name)</label>
             <input

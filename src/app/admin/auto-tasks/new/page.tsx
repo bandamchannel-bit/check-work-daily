@@ -16,7 +16,10 @@ export default async function NewAutoTaskPage() {
       </div>
 
       <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6 max-w-2xl">
-        <form action={createAutoTask} className="space-y-6">
+        <form action={async (formData: FormData) => {
+          'use server'
+          await createAutoTask(formData)
+        }} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">ຫົວຂໍ້ວຽກ (Task Title)</label>
             <input

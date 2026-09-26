@@ -32,7 +32,10 @@ export default async function SubmitTaskPage({ params }: { params: Promise<{ id:
           </p>
         </div>
 
-        <form action={updateTaskStatus} className="space-y-6">
+        <form action={async (formData: FormData) => {
+          'use server'
+          await updateTaskStatus(formData)
+        }} className="space-y-6">
           <input type="hidden" name="taskId" value={task.id} />
           
           <div>

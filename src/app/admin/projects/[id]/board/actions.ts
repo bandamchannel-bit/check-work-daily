@@ -18,7 +18,7 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
 export async function addComment(taskId: string, content: string) {
   const { getSession } = await import('@/app/actions/auth')
   const session = await getSession()
-  if (!session) throw new Error('Unauthorized')
+  if (!session || !session.userId) throw new Error('Unauthorized')
 
   const comment = await prisma.comment.create({
     data: {

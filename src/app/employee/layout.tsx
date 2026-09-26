@@ -14,12 +14,12 @@ export default async function EmployeeLayout({
     redirect('/')
   }
 
-  const user = await prisma.user.findUnique({ where: { id: session.userId } })
+  const user = session?.userId ? await prisma.user.findUnique({ where: { id: session.userId } }) : null
   const isAdminPreview = session.userRole === 'ADMIN'
 
   return (
     <div className="flex min-h-screen bg-gray-50/50">
-      <Sidebar role={session.userRole} userEmail={user?.email} userName={user?.name} />
+      <Sidebar role={session.userRole} userEmail={user?.email || undefined} userName={user?.name || undefined} />
       <div className="flex-1 md:ml-64 flex flex-col min-w-0 min-h-screen">
         {/* Admin Preview Floating/Top Banner */}
         {isAdminPreview && (

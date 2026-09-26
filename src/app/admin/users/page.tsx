@@ -27,5 +27,5 @@ export default async function AdminUsersPage() {
     createdAt: user.createdAt.toISOString()
   }))
 
-  return <UsersClient initialUsers={serializedUsers} currentUserId={session.userId} />
+  return <UsersClient initialUsers={serializedUsers} currentUserId={session.userId || ''} />
 }
