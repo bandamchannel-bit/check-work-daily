@@ -1,6 +1,23 @@
+'use client'
 import { login } from '@/app/actions/auth'
+import { useState } from 'react'
 
 export default function Home() {
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    const formData = new FormData(e.currentTarget)
+    const res = await login(formData)
+    if (res?.error) {
+      setError(res.error)
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50/50 relative overflow-hidden">
       {/* Background Decor */}
@@ -15,10 +32,12 @@ export default function Home() {
           <p className="mt-2 text-sm text-gray-500">ລະບົບຕິດຕາມວຽກ WorkTracker</p>
         </div>
         
-        <form action={async (formData: FormData) => {
-          'use server'
-          await login(formData)
-        }} className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          {error && (
+            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+              {error}
+            </div>
+          )}
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">ອີເມວ (Email)</label>
@@ -45,9 +64,10 @@ export default function Home() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full px-4 py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-600/20 transition-all shadow-lg shadow-blue-600/20"
+              disabled={loading}
+              className="w-full px-4 py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-600/20 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-70 flex justify-center items-center"
             >
-              ເຂົ້າສູ່ລະບົບ (Login)
+              {loading ? 'ກຳລັງເຂົ້າສູ່ລະບົບ...' : 'ເຂົ້າສູ່ລະບົບ (Login)'}
             </button>
           </div>
         </form>
