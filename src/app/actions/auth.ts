@@ -6,7 +6,7 @@ import { createSession, deleteSession, verifySession } from '@/lib/session'
 import bcrypt from 'bcrypt'
 
 export async function login(formData: FormData) {
-  const email = formData.get('email') as string
+  const email = (formData.get('email') as string)?.toLowerCase()
   const password = formData.get('password') as string
 
   if (!email || !password) {
