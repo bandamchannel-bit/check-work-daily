@@ -52,6 +52,12 @@ export default function ProjectForm({
     }))
   }
 
+  const updateTaskOffset = (taskId: string, days: number) => {
+    setSelectedTasks(prev => prev.map(t => 
+      t.id === taskId ? { ...t, dayOffset: days } : t
+    ))
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (template !== 'blank') {
       const formData = new FormData(e.currentTarget)
@@ -195,7 +201,18 @@ export default function ProjectForm({
                     <div>
                       <div className="font-semibold text-sm text-gray-900">{task.title}</div>
                       <div className="text-xs text-gray-500 mt-1">{task.description}</div>
-                      <div className="text-xs text-blue-600 mt-1 font-medium">👉 ກຳນົດສົ່ງ: ມື້ທີ {task.dayOffset} ນັບຈາກມື້ເລີ່ມຕົ້ນ</div>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-blue-700 font-medium bg-blue-100/50 w-max px-2 py-1.5 rounded-lg border border-blue-200">
+                        <span>👉 ກຳນົດສົ່ງພາຍໃນ</span>
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={task.dayOffset}
+                          onChange={(e) => updateTaskOffset(task.id, parseInt(e.target.value) || 0)}
+                          onClick={(e) => e.stopPropagation()} 
+                          className="w-14 px-1 py-0.5 text-center border border-blue-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <span>ມື້ ນັບຈາກມື້ເລີ່ມຕົ້ນ</span>
+                      </div>
                     </div>
                   </label>
 
