@@ -8,7 +8,7 @@ export async function createProject(formData: FormData) {
   const name = formData.get('name') as string
   const description = formData.get('description') as string
   const templateId = formData.get('templateId') as string
-  const userId = formData.get('userId') as string
+  const userIds = formData.getAll('userIds') as string[]
   const platformId = formData.get('platformId') as string
   const startDateStr = formData.get('startDate') as string
 
@@ -27,34 +27,36 @@ export async function createProject(formData: FormData) {
   const customTasksData = formData.get('customTasksData') as string
 
   // If a template is selected, generate tasks from customTasksData
-  if (templateId && templateId !== 'blank' && userId && platformId && startDateStr && customTasksData) {
+  if (templateId && templateId !== 'blank' && userIds.length > 0 && platformId && startDateStr && customTasksData) {
     const startDate = new Date(startDateStr)
     const parsedTasks = JSON.parse(customTasksData)
 
-    for (const t of parsedTasks) {
-      if (!t.enabled) continue // Skip disabled tasks
+    for (const userId of userIds) {
+      for (const t of parsedTasks) {
+        if (!t.enabled) continue // Skip disabled tasks
 
-      const dueDate = new Date(startDate)
-      dueDate.setDate(dueDate.getDate() + t.dayOffset)
-      
-      // Filter enabled subtasks
-      const enabledSubtasks = t.subtasks?.filter((st: any) => st.enabled) || []
-      const subTasksData = enabledSubtasks.map((st: any) => ({ title: st.title }))
+        const dueDate = new Date(startDate)
+        dueDate.setDate(dueDate.getDate() + t.dayOffset)
+        
+        // Filter enabled subtasks
+        const enabledSubtasks = t.subtasks?.filter((st: any) => st.enabled) || []
+        const subTasksData = enabledSubtasks.map((st: any) => ({ title: st.title }))
 
-      await prisma.task.create({
-        data: {
-          title: t.title,
-          description: t.description,
-          status: 'TODO',
-          dueDate: dueDate,
-          userId,
-          platformId,
-          projectId: project.id,
-          subTasks: {
-            create: subTasksData
+        await prisma.task.create({
+          data: {
+            title: t.title,
+            description: t.description,
+            status: 'TODO',
+            dueDate: dueDate,
+            userId: userId,
+            platformId,
+            projectId: project.id,
+            subTasks: {
+              create: subTasksData
+            }
           }
-        }
-      })
+        })
+      }
     }
   }
 

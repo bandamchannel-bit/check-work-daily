@@ -52,8 +52,20 @@ export default function ProjectForm({
     }))
   }
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (template !== 'blank') {
+      const formData = new FormData(e.currentTarget)
+      const userIds = formData.getAll('userIds')
+      if (userIds.length === 0) {
+        e.preventDefault()
+        alert('ກະລຸນາເລືອກພະນັກງານຢ່າງໜ້ອຍ 1 ຄົນ')
+        return
+      }
+    }
+  }
+
   return (
-    <form action={createProjectAction} className="space-y-6">
+    <form action={createProjectAction} onSubmit={handleSubmit} className="space-y-6">
       {/* Hidden input to pass customized tasks to server action */}
       <input type="hidden" name="customTasksData" value={JSON.stringify(selectedTasks)} />
 
@@ -143,11 +155,16 @@ export default function ProjectForm({
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">ມອບໃຫ້ (Assignee)</label>
-              <select name="userId" required={template !== 'blank'} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm">
-                <option value="">-- ເລືອກພະນັກງານ --</option>
-                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-              </select>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">ມອບໃຫ້ (ເລືອກໄດ້ຫຼາຍຄົນ)</label>
+              <div className="w-full max-h-32 overflow-y-auto bg-white border border-gray-200 rounded-lg p-2 space-y-1">
+                {users.map(u => (
+                  <label key={u.id} className="flex items-center gap-2 p-1.5 hover:bg-blue-50 rounded cursor-pointer transition-colors">
+                    <input type="checkbox" name="userIds" value={u.id} className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                    <span className="text-sm text-gray-700">{u.name}</span>
+                  </label>
+                ))}
+                {users.length === 0 && <span className="text-xs text-gray-500 p-1">ບໍ່ມີພະນັກງານ</span>}
+              </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">ເພຈ/ຊ່ອງ (Platform)</label>
