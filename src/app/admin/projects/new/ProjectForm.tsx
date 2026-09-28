@@ -58,6 +58,26 @@ export default function ProjectForm({
     ))
   }
 
+  const updateTaskField = (taskId: string, field: 'title' | 'description', value: string) => {
+    setSelectedTasks(prev => prev.map(t => 
+      t.id === taskId ? { ...t, [field]: value } : t
+    ))
+  }
+
+  const updateSubtaskField = (taskId: string, subtaskId: string, value: string) => {
+    setSelectedTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return {
+          ...t,
+          subtasks: t.subtasks.map((st: any) => 
+            st.id === subtaskId ? { ...st, title: value } : st
+          )
+        }
+      }
+      return t
+    }))
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     if (template !== 'blank') {
       const formData = new FormData(e.currentTarget)
@@ -205,9 +225,23 @@ export default function ProjectForm({
                       onChange={() => toggleTask(task.id)}
                       className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" 
                     />
-                    <div>
-                      <div className="font-semibold text-sm text-gray-900">{task.title}</div>
-                      <div className="text-xs text-gray-500 mt-1">{task.description}</div>
+                    <div className="flex-1 min-w-0">
+                      <input 
+                        type="text" 
+                        value={task.title} 
+                        onChange={(e) => updateTaskField(task.id, 'title', e.target.value)} 
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full font-bold text-sm text-gray-900 bg-white border border-transparent hover:border-gray-200 focus:border-blue-400 rounded px-1.5 py-0.5 -ml-1.5 transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        placeholder="ຊື່ໜ້າວຽກ..."
+                      />
+                      <input 
+                        type="text" 
+                        value={task.description} 
+                        onChange={(e) => updateTaskField(task.id, 'description', e.target.value)} 
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full text-xs text-gray-500 mt-0.5 bg-white border border-transparent hover:border-gray-200 focus:border-blue-400 rounded px-1.5 py-0.5 -ml-1.5 transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        placeholder="ລາຍລະອຽດ..."
+                      />
                       <div className="flex items-center gap-2 mt-2 text-xs text-blue-700 font-medium bg-blue-100/50 w-max px-2 py-1.5 rounded-lg border border-blue-200">
                         <span>👉 ກຳນົດສົ່ງພາຍໃນ</span>
                         <input 
@@ -231,9 +265,15 @@ export default function ProjectForm({
                             type="checkbox" 
                             checked={st.enabled}
                             onChange={() => toggleSubtask(task.id, st.id)}
-                            className="w-3.5 h-3.5 text-blue-500 rounded border-gray-300 focus:ring-blue-500" 
+                            className="w-3.5 h-3.5 text-blue-500 rounded border-gray-300 focus:ring-blue-500 flex-shrink-0" 
                           />
-                          <span className={`text-xs transition-colors ${st.enabled ? 'text-gray-700 group-hover:text-blue-700' : 'text-gray-400 line-through'}`}>{st.title}</span>
+                          <input 
+                            type="text"
+                            value={st.title}
+                            onChange={(e) => updateSubtaskField(task.id, st.id, e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            className={`flex-1 text-xs bg-white border border-transparent hover:border-gray-200 focus:border-blue-400 rounded px-1.5 py-0.5 -ml-1.5 transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400 ${st.enabled ? 'text-gray-700' : 'text-gray-400 line-through'}`}
+                          />
                         </label>
                       ))}
                     </div>
