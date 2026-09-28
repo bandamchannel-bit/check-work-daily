@@ -11,16 +11,25 @@ export async function createProject(formData: FormData) {
   const userIds = formData.getAll('userIds') as string[]
   const platformId = formData.get('platformId') as string
   const startDateStr = formData.get('startDate') as string
+  const projectDurationStr = formData.get('projectDuration') as string
 
   if (!name) {
     return { error: 'Please enter a project name' }
+  }
+
+  // Calculate project due date if duration is provided
+  let projectDueDate: Date | undefined = undefined;
+  if (startDateStr && projectDurationStr) {
+    projectDueDate = new Date(startDateStr);
+    projectDueDate.setDate(projectDueDate.getDate() + parseInt(projectDurationStr));
   }
 
   // Create the project first
   const project = await prisma.project.create({
     data: {
       name,
-      description
+      description,
+      dueDate: projectDueDate
     }
   })
 

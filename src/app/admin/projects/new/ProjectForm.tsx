@@ -159,7 +159,7 @@ export default function ProjectForm({
         <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 space-y-4">
           <h4 className="font-semibold text-blue-900 mb-2">ຕັ້ງຄ່າ ແລະ ປັບແຕ່ງໜ້າວຽກສຳລັບ Template ນີ້</h4>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">ມອບໃຫ້ (ເລືອກໄດ້ຫຼາຍຄົນ)</label>
               <div className="w-full max-h-32 overflow-y-auto bg-white border border-gray-200 rounded-lg p-2 space-y-1">
@@ -181,7 +181,14 @@ export default function ProjectForm({
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">ວັນທີເລີ່ມຕົ້ນ (Start Date)</label>
-              <input type="date" name="startDate" required={template !== 'blank'} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm" />
+              <input type="date" name="startDate" required={template !== 'blank'} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">ເວລາລວມໂປຣເຈັກ (Project Duration)</label>
+              <div className="flex items-center">
+                <input type="number" name="projectDuration" min="1" placeholder="ຕົວຢ່າງ: 30" required={template !== 'blank'} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-l-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <span className="px-3 py-2 bg-gray-100 border border-l-0 border-gray-200 rounded-r-lg text-sm text-gray-600 whitespace-nowrap">ມື້ (Days)</span>
+              </div>
             </div>
           </div>
 
