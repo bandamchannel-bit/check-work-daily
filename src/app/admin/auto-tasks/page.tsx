@@ -1,4 +1,4 @@
-﻿import prisma from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import { toggleAutoTask, deleteAutoTask } from '@/app/actions/auto-tasks'
 
@@ -14,70 +14,86 @@ export default async function AutoTasksPage() {
   })
 
   return (
-    <div>
-      <div className="mb-6 flex justify-between items-center">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">àº¥àº°àºšàº»àºšàºªà»‰àº²àº‡àº§àº½àºàº­àº±àº”àº•àº°à»‚àº™àº¡àº±àº” (Auto-Tasks)</h1>
-          <p className="text-sm text-gray-500 mt-1">àº§àº½àºà»ƒàº™à»œà»‰àº²àº™àºµà»‰àºˆàº°àº–àº·àºàºªà»‰àº²àº‡àº‚àº¶à»‰àº™à»ƒà»à»ˆàº—àº¸àºà»†àº¡àº·à»‰àº­àº±àº”àº•àº°à»‚àº™àº¡àº±àº”</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">ລະບົບສ້າງວຽກອັດຕະໂນມັດ (Auto-Tasks)</h1>
+          <p className="text-sm text-gray-500 mt-1">ຕັ້ງຄ່າວຽກປະຈຳວັນ ທີ່ຈະຖືກສ້າງຂຶ້ນໃໝ່ທຸກໆມື້ອັດຕະໂນມັດ</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3 w-full sm:w-auto">
           <Link 
             href="/api/cron/generate-tasks" 
             target="_blank"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
+            className="flex-1 sm:flex-none text-center bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-200 font-semibold transition-colors text-sm border border-gray-200"
           >
-            Run Cron àº”àº½àº§àº™àºµà»‰
+            ▶️ Run Cron ເອງ
           </Link>
           <Link 
             href="/admin/auto-tasks/new" 
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+            className="flex-1 sm:flex-none text-center bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 font-semibold transition-all shadow-md shadow-blue-600/20 text-sm"
           >
-            + à»€àºžàºµà»ˆàº¡àº§àº½àºàº›àº°àºˆàº³
+            + ເພີ່ມວຽກປະຈຳ
           </Link>
         </div>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
+      <div className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden">
+        <ul className="divide-y divide-gray-100">
           {configs.length === 0 ? (
-            <li className="px-4 py-8 text-center text-gray-500">
-              àºàº±àº‡àºšà»à»ˆàº¡àºµàºàº²àº™àº•àº±à»‰àº‡àº„à»ˆàº²àº§àº½àºàº›àº°àºˆàº³
+            <li className="px-6 py-12 text-center flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <p className="text-gray-500 font-medium text-sm">ຍັງບໍ່ມີການຕັ້ງຄ່າວຽກປະຈຳວັນເທື່ອ</p>
             </li>
           ) : (
             configs.map((config) => (
-              <li key={config.id}>
-                <div className="px-4 py-4 flex items-center justify-between sm:px-6">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 truncate">{config.title}</h3>
-                    <div className="mt-1 flex flex-col sm:flex-row sm:space-x-4 text-sm text-gray-500">
-                      <span>àºžàº°àº™àº±àºàº‡àº²àº™: {config.user.name}</span>
-                      <span className="hidden sm:inline">&middot;</span>
-                      <span>à»€àºžàºˆ: {config.platform.name}</span>
-                      <span className="hidden sm:inline">&middot;</span>
-                      <span className="font-semibold text-red-500">à»€àº§àº¥àº² (Deadline): {config.timeOfDay}</span>
+              <li key={config.id} className="hover:bg-gray-50/50 transition-colors">
+                <div className="px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 truncate mb-1">{config.title}</h3>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                      <span className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md text-gray-700 font-medium">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        {config.user.name}
+                      </span>
+                      <span className="hidden sm:inline text-gray-300">•</span>
+                      <span className="flex items-center gap-1 font-medium text-gray-600">
+                        🗂️ {config.platform.name}
+                      </span>
+                      <span className="hidden sm:inline text-gray-300">•</span>
+                      <span className="flex items-center gap-1 font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md">
+                        ⏰ ກຳນົດສົ່ງ: {config.timeOfDay}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      config.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  
+                  <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
+                    <span className={`px-2.5 py-1 text-xs font-bold rounded-lg uppercase tracking-wider flex-shrink-0 ${
+                      config.isActive ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gray-100 text-gray-500 border border-gray-200'
                     }`}>
-                      {config.isActive ? 'à»€àº›àºµàº”à»ƒàºŠà»‰àº‡àº²àº™' : 'àº›àº´àº”à»ƒàºŠà»‰àº‡àº²àº™'}
+                      {config.isActive ? 'ເປີດໃຊ້ງານ' : 'ປິດໃຊ້ງານ'}
                     </span>
-                                        <form action={async () => {
-                      'use server'
-                      await toggleAutoTask(config.id, config.isActive)
-                    }}>
-                      <button type="submit" className="text-sm text-blue-600 hover:underline">
-                        {config.isActive ? 'ປິດ' : 'ເປີດ'}
-                      </button>
-                    </form>
-                    <Link href={`/admin/auto-tasks/edit/${config.id}`} className="text-sm text-orange-500 hover:underline">ແກ້ໄຂ</Link>
-                    <form action={async () => {
-                      'use server'
-                      await deleteAutoTask(config.id)
-                    }}>
-                      <button type="submit" className="text-sm text-red-600 hover:underline">ລຶບ</button>
-                    </form>
+                    
+                    <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
+                      <form action={async () => {
+                        'use server'
+                        await toggleAutoTask(config.id, config.isActive)
+                      }}>
+                        <button type="submit" className={`text-sm font-semibold transition-colors ${config.isActive ? 'text-gray-400 hover:text-gray-700' : 'text-emerald-600 hover:text-emerald-700'}`}>
+                          {config.isActive ? 'ປິດ' : 'ເປີດ'}
+                        </button>
+                      </form>
+                      <Link href={`/admin/auto-tasks/edit/${config.id}`} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                        ແກ້ໄຂ
+                      </Link>
+                      <form action={async () => {
+                        'use server'
+                        await deleteAutoTask(config.id)
+                      }}>
+                        <button type="submit" className="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors">ລຶບ</button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               </li>
@@ -88,4 +104,3 @@ export default async function AutoTasksPage() {
     </div>
   )
 }
-
