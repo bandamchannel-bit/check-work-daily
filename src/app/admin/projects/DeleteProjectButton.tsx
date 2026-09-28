@@ -25,7 +25,7 @@ export default function DeleteProjectButton({ projectId, projectName }: { projec
     <button 
       onClick={handleDelete}
       disabled={isDeleting}
-      className="absolute top-4 right-4 z-20 p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50 border border-red-100 shadow-sm"
+      className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 hover:text-red-700 transition-colors disabled:opacity-50 border border-red-100 shadow-sm"
       title="ລຶບໂປຣເຈັກ"
     >
       {isDeleting ? (
