@@ -64,6 +64,7 @@ export default async function EmployeeDashboard({
     project: t.project ? {
       id: t.project.id,
       name: t.project.name,
+      description: t.project.description,
     } : null,
     subTasks: (t.subTasks || []).map((st: any) => ({
       id: st.id,

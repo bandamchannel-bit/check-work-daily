@@ -23,6 +23,7 @@ type Task = {
   project?: {
     id: string
     name: string
+    description?: string | null
   } | null
 }
 
@@ -475,9 +476,10 @@ function ProjectCard({ project, tasks, nowTs, onClick }: { project: { id: string
 }
 
 // ─── Focused Task List (Platform or Project) ──────────────────────────────────
-function FocusedTaskList({ title, subtitle, icon, tasks, nowTs, onBack, onMarkDone, onStatusChange, changingStatus, onViewDetail }: {
+function FocusedTaskList({ title, subtitle, description, icon, tasks, nowTs, onBack, onMarkDone, onStatusChange, changingStatus, onViewDetail }: {
   title: string
   subtitle: string
+  description?: string | null
   icon?: React.ReactNode
   tasks: Task[]
   nowTs: number
@@ -501,15 +503,18 @@ function FocusedTaskList({ title, subtitle, icon, tasks, nowTs, onBack, onMarkDo
   return (
     <div className="space-y-4">
       {/* Back button + Header */}
-      <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-10 h-10 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0">
+      <div className="flex items-start sm:items-center gap-3">
+        <button onClick={onBack} className="mt-1 sm:mt-0 w-10 h-10 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0">
           <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <div className="flex items-center gap-3 min-w-0 flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm px-5 py-3.5">
+        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm px-5 py-3.5">
           {icon}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className="font-extrabold text-gray-900 text-base truncate">{title}</h2>
-            <p className="text-xs font-semibold text-gray-500">{subtitle} · {tasks.length} ວຽກ · {done} ສຳເລັດ{late > 0 ? ` · ⚠️ ${late} ຊ້າ` : ''}</p>
+            {description && (
+              <p className="text-sm text-gray-600 mt-1 whitespace-pre-line leading-relaxed">{description}</p>
+            )}
+            <p className="text-xs font-semibold text-gray-500 mt-1.5">{subtitle} · {tasks.length} ວຽກ · {done} ສຳເລັດ{late > 0 ? ` · ⚠️ ${late} ຊ້າ` : ''}</p>
           </div>
         </div>
       </div>
@@ -708,11 +713,12 @@ export default function EmployeeDashboardClient({
 
   // Group tasks by project
   const projectGroups = useMemo(() => {
-    const map: Record<string, { id: string; name: string; tasks: Task[] }> = {}
+    const map: Record<string, { id: string; name: string; description?: string | null; tasks: Task[] }> = {}
     tasks.forEach(t => {
       const pid = t.project?.id || 'none'
       const pname = t.project?.name || 'ວຽກທົ່ວໄປ (General Tasks)'
-      if (!map[pid]) map[pid] = { id: pid, name: pname, tasks: [] }
+      const pdesc = t.project?.description || null
+      if (!map[pid]) map[pid] = { id: pid, name: pname, description: pdesc, tasks: [] }
       map[pid].tasks.push(t)
     })
     return Object.values(map).sort((a, b) => {
@@ -873,6 +879,7 @@ export default function EmployeeDashboardClient({
           <FocusedTaskList
             title={selectedProjectGroup.name}
             subtitle="ໂປຣເຈັກ"
+            description={selectedProjectGroup.description}
             icon={
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white text-lg flex-shrink-0">
                 📁
