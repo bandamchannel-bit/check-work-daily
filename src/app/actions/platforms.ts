@@ -2,25 +2,22 @@
 
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import { writeFile } from 'fs/promises'
+import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
 async function saveFile(file: File | null): Promise<string | null> {
   if (!file || file.size === 0) return null
   
+  // To avoid ephemeral disk issues on Render, we convert the image directly to base64
+  // and store it as a data URL string in the database.
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
   
-  // Create a unique filename
-  const extension = file.name.split('.').pop() || 'png'
-  const filename = `${uuidv4()}.${extension}`
+  const mimeType = file.type || 'image/png'
+  const base64String = buffer.toString('base64')
   
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-  const filepath = path.join(uploadDir, filename)
-  
-  await writeFile(filepath, buffer)
-  return `/uploads/${filename}`
+  return `data:${mimeType};base64,${base64String}`
 }
 
 import { getSession } from './auth'
