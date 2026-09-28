@@ -483,7 +483,7 @@ function FocusedTaskList({ title, subtitle, description, icon, tasks, nowTs, onB
   icon?: React.ReactNode
   tasks: Task[]
   nowTs: number
-  onBack: () => void
+  onBack?: () => void
   onMarkDone: (task: Task) => void
   onStatusChange: (taskId: string, status: string) => void
   changingStatus: string | null
@@ -504,9 +504,11 @@ function FocusedTaskList({ title, subtitle, description, icon, tasks, nowTs, onB
     <div className="space-y-4">
       {/* Back button + Header */}
       <div className="flex items-start sm:items-center gap-3">
-        <button onClick={onBack} className="mt-1 sm:mt-0 w-10 h-10 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0">
-          <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/></svg>
-        </button>
+        {onBack && (
+          <button onClick={onBack} className="mt-1 sm:mt-0 w-10 h-10 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0">
+            <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/></svg>
+          </button>
+        )}
         <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm px-5 py-3.5">
           {icon}
           <div className="min-w-0 flex-1">
@@ -668,7 +670,7 @@ export default function EmployeeDashboardClient({
 }) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [detailModalTask, setDetailModalTask] = useState<Task | null>(null)
-  const [viewGrouping, setViewGrouping] = useState<'PLATFORM' | 'PROJECT'>('PLATFORM')
+  const [viewGrouping, setViewGrouping] = useState<'ALL' | 'PLATFORM' | 'PROJECT'>('ALL')
   const [selectedPlatformId, setSelectedPlatformId] = useState<string | null>(null)
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [proofTask, setProofTask] = useState<Task | null>(null)
@@ -815,13 +817,24 @@ export default function EmployeeDashboardClient({
           </div>
         </div>
 
-        {/* ── View Mode Switcher (By Platform vs By Project) ── */}
+        {/* ── View Mode Switcher ── */}
         {!selectedPlatformId && !selectedProjectId && (
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center bg-gray-100 p-1 rounded-2xl border border-gray-200">
+            <div className="flex items-center bg-gray-100 p-1 rounded-2xl border border-gray-200 overflow-x-auto">
+              <button
+                onClick={() => setViewGrouping('ALL')}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  viewGrouping === 'ALL'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                <span>📋</span>
+                <span>ລວມວຽກທັງໝົດ</span>
+              </button>
               <button
                 onClick={() => setViewGrouping('PLATFORM')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   viewGrouping === 'PLATFORM'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-500 hover:text-gray-800'
@@ -832,7 +845,7 @@ export default function EmployeeDashboardClient({
               </button>
               <button
                 onClick={() => setViewGrouping('PROJECT')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   viewGrouping === 'PROJECT'
                     ? 'bg-white text-indigo-600 shadow-sm'
                     : 'text-gray-500 hover:text-gray-800'
@@ -888,6 +901,23 @@ export default function EmployeeDashboardClient({
             tasks={selectedProjectGroup.tasks}
             nowTs={now}
             onBack={() => setSelectedProjectId(null)}
+            onMarkDone={task => setProofTask(task)}
+            onStatusChange={handleStatusChange}
+            changingStatus={changingStatus}
+            onViewDetail={setDetailModalTask}
+          />
+        ) : viewGrouping === 'ALL' ? (
+          // ── All Tasks List ──
+          <FocusedTaskList
+            title="ລວມວຽກທັງໝົດ"
+            subtitle="ລາຍການໜ້າວຽກທັງໝົດຂອງທ່ານ"
+            icon={
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center font-bold text-white text-lg flex-shrink-0 shadow-sm">
+                📋
+              </div>
+            }
+            tasks={tasks}
+            nowTs={now}
             onMarkDone={task => setProofTask(task)}
             onStatusChange={handleStatusChange}
             changingStatus={changingStatus}
