@@ -16,8 +16,12 @@ export async function proxy(req: NextRequest) {
   // API Route Protection (Cron)
   if (path.startsWith('/api/cron/')) {
     const authHeader = req.headers.get('authorization')
-    // In production, require CRON_SECRET. For now, allow localhost to run them without it.
-    if (process.env.NODE_ENV === 'production' && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const querySecret = req.nextUrl.searchParams.get('secret')
+    const isValidSecret = process.env.CRON_SECRET && (authHeader === `Bearer ${process.env.CRON_SECRET}` || querySecret === process.env.CRON_SECRET)
+    const isAdmin = session?.userRole === 'ADMIN'
+
+    // In production, require either valid CRON_SECRET or an active ADMIN session
+    if (process.env.NODE_ENV === 'production' && !isValidSecret && !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     return NextResponse.next()
