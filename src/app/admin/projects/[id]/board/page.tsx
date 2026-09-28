@@ -40,12 +40,17 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">{project.name}</h1>
         </div>
-        
-        <Link href={`/admin/tasks/new?projectId=${project.id}`} className="bg-blue-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl hover:bg-blue-700 font-semibold transition-all shadow-md shadow-blue-600/20 flex items-center gap-2 text-sm">
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          <span className="hidden sm:inline">ເພີ່ມວຽກເຂົ້າໂປຣເຈັກ</span>
-          <span className="sm:hidden">+ ວຽກໃໝ່</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href={`/admin/projects/${project.id}/edit`} className="bg-white text-blue-600 border border-blue-200 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl hover:bg-blue-50 font-semibold transition-all shadow-sm flex items-center gap-2 text-sm">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            <span className="hidden sm:inline">ແກ້ໄຂໂປຣເຈັກ</span>
+          </Link>
+          <Link href={`/admin/tasks/new?projectId=${project.id}`} className="bg-blue-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl hover:bg-blue-700 font-semibold transition-all shadow-md shadow-blue-600/20 flex items-center gap-2 text-sm">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            <span className="hidden sm:inline">ເພີ່ມວຽກເຂົ້າໂປຣເຈັກ</span>
+            <span className="sm:hidden">+ ວຽກໃໝ່</span>
+          </Link>
+        </div>
       </div>
 
       <div>

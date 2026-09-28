@@ -85,3 +85,28 @@ export async function deleteProject(id: string) {
   
   revalidatePath('/admin/projects')
 }
+
+export async function updateProject(id: string, formData: FormData) {
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string
+  const status = formData.get('status') as string
+  const dueDateStr = formData.get('dueDate') as string
+
+  if (!name) {
+    return { error: 'Please enter a project name' }
+  }
+
+  await prisma.project.update({
+    where: { id },
+    data: {
+      name,
+      description,
+      status,
+      dueDate: dueDateStr ? new Date(dueDateStr) : null
+    }
+  })
+
+  revalidatePath('/admin/projects')
+  revalidatePath(`/admin/projects/${id}/board`)
+  redirect('/admin/projects')
+}

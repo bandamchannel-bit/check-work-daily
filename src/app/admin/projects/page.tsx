@@ -47,7 +47,12 @@ export default async function ProjectsPage() {
           return (
             <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-100 transition-all duration-300 group flex flex-col relative overflow-hidden">
               
-              <DeleteProjectButton projectId={project.id} projectName={project.name} />
+              <div className="absolute top-4 right-4 z-20 flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                <Link href={`/admin/projects/${project.id}/edit`} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors border border-blue-100 shadow-sm" title="ແກ້ໄຂໂປຣເຈັກ">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                </Link>
+                <DeleteProjectButton projectId={project.id} projectName={project.name} />
+              </div>
 
               <Link href={`/admin/projects/${project.id}/board`} className="p-6 flex flex-col flex-1">
                 {/* Top decorative gradient line */}
