@@ -73,8 +73,15 @@ export async function createProject(formData: FormData) {
 }
 
 export async function deleteProject(id: string) {
+  // First, delete all tasks inside this project (Cascade will handle comments, subtasks, etc)
+  await prisma.task.deleteMany({
+    where: { projectId: id }
+  })
+
+  // Then delete the project itself
   await prisma.project.delete({
     where: { id }
   })
+  
   revalidatePath('/admin/projects')
 }

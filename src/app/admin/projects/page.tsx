@@ -2,6 +2,8 @@ import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import ProjectCountdownBadge from './ProjectCountdownBadge'
 
+import DeleteProjectButton from './DeleteProjectButton'
+
 export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({
     orderBy: { createdAt: 'desc' },
@@ -43,54 +45,58 @@ export default async function ProjectsPage() {
         {projects.map((project) => {
           const nextTask = project.tasks[0]
           return (
-            <Link key={project.id} href={`/admin/projects/${project.id}/board`} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-100 transition-all duration-300 group flex flex-col relative overflow-hidden">
+            <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-100 transition-all duration-300 group flex flex-col relative overflow-hidden">
               
-              {/* Top decorative gradient line */}
-              <div className={`absolute top-0 left-0 right-0 h-1 ${project.status === 'ACTIVE' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' : 'bg-gray-200'}`}></div>
+              <DeleteProjectButton projectId={project.id} projectName={project.name} />
 
-              <div className="flex justify-between items-start mb-4 mt-2">
-                <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{project.name}</h3>
-                <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                  project.status === 'ACTIVE' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'
-                }`}>
-                  {project.status === 'ACTIVE' ? 'ກຳລັງດຳເນີນການ' : 'ສຳເລັດແລ້ວ'}
-                </span>
-              </div>
-              
-              <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-                {project.description || 'ບໍ່ມີລາຍລະອຽດ...'}
-              </p>
+              <Link href={`/admin/projects/${project.id}/board`} className="p-6 flex flex-col flex-1">
+                {/* Top decorative gradient line */}
+                <div className={`absolute top-0 left-0 right-0 h-1 ${project.status === 'ACTIVE' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' : 'bg-gray-200'}`}></div>
 
-              {/* Countdown for Project's next task */}
-              {nextTask ? (
-                <div className="mb-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border border-blue-100/80 rounded-xl p-2.5 space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-blue-950 flex items-center gap-1">
-                      <span>⏰ ນັບຖອຍຫຼັງວຽກຕໍ່ໄປ:</span>
-                    </span>
-                    <ProjectCountdownBadge dueDate={nextTask.dueDate.toISOString()} />
+                <div className="flex justify-between items-start mb-4 mt-2 pr-8">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{project.name}</h3>
+                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                    project.status === 'ACTIVE' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {project.status === 'ACTIVE' ? 'ກຳລັງດຳເນີນການ' : 'ສຳເລັດແລ້ວ'}
+                  </span>
+                </div>
+                
+                <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
+                  {project.description || 'ບໍ່ມີລາຍລະອຽດ...'}
+                </p>
+
+                {/* Countdown for Project's next task */}
+                {nextTask ? (
+                  <div className="mb-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border border-blue-100/80 rounded-xl p-2.5 space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-blue-950 flex items-center gap-1">
+                        <span>⏰ ນັບຖອຍຫຼັງວຽກຕໍ່ໄປ:</span>
+                      </span>
+                      <ProjectCountdownBadge dueDate={nextTask.dueDate.toISOString()} />
+                    </div>
+                    <p className="text-xs font-semibold text-gray-800 truncate">
+                      {nextTask.title}
+                    </p>
                   </div>
-                  <p className="text-xs font-semibold text-gray-800 truncate">
-                    {nextTask.title}
-                  </p>
-                </div>
-              ) : project._count.tasks > 0 ? (
-                <div className="mb-4 bg-emerald-50 border border-emerald-100 rounded-xl p-2.5 text-center text-xs font-bold text-emerald-700">
-                  🎉 ສຳເລັດທຸກວຽກໃນໂປຣເຈັກແລ້ວ!
-                </div>
-              ) : null}
+                ) : project._count.tasks > 0 ? (
+                  <div className="mb-4 bg-emerald-50 border border-emerald-100 rounded-xl p-2.5 text-center text-xs font-bold text-emerald-700">
+                    🎉 ສຳເລັດທຸກວຽກໃນໂປຣເຈັກແລ້ວ!
+                  </div>
+                ) : null}
 
-              <div className="flex items-center justify-between text-sm pt-4 border-t border-gray-50 mt-auto">
-                <div className="flex items-center gap-1.5 text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                  <span className="font-semibold text-gray-700">{project._count.tasks}</span> ວຽກ
+                <div className="flex items-center justify-between text-sm pt-4 border-t border-gray-50 mt-auto">
+                  <div className="flex items-center gap-1.5 text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    <span className="font-semibold text-gray-700">{project._count.tasks}</span> ວຽກ
+                  </div>
+                  <div className="font-semibold text-blue-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    ເປີດ Board 
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </div>
                 </div>
-                <div className="font-semibold text-blue-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  ເປີດ Board 
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </div>
-              </div>
-            </Link>
+              </Link>
+            </div>
           )
         })}
 
