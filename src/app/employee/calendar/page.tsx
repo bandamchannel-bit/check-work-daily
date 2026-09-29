@@ -2,12 +2,16 @@ import prisma from '@/lib/prisma'
 import { getSession } from '@/app/actions/auth'
 import { redirect } from 'next/navigation'
 import CalendarClient from '@/components/CalendarClient'
+import Link from 'next/link'
 
-export default async function AdminCalendarPage() {
+export default async function EmployeeCalendarPage() {
   const session = await getSession()
-  if (!session || session.userRole !== 'ADMIN') redirect('/login')
+  if (!session || !session.userId) redirect('/login')
 
   const tasks = await prisma.task.findMany({
+    where: {
+      userId: session.userId
+    },
     include: {
       user: { select: { id: true, name: true } },
       platform: { select: { id: true, name: true, pageName: true, logoUrl: true } },
@@ -43,10 +47,22 @@ export default async function AdminCalendarPage() {
   }))
 
   return (
-    <CalendarClient 
-      initialTasks={serializedTasks} 
-      currentUserId={session.userId!} 
-      isAdmin={true} 
-    />
+    <div className="flex flex-col h-[calc(100vh-80px)]">
+      <div className="mb-4">
+        <Link href="/employee" className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 w-fit">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          ກັບຄືນໜ້າຫຼັກ (Back to Dashboard)
+        </Link>
+      </div>
+      <div className="flex-1 bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
+        <CalendarClient 
+          initialTasks={serializedTasks} 
+          currentUserId={session.userId} 
+          isAdmin={session.userRole === 'ADMIN'} 
+        />
+      </div>
+    </div>
   )
 }

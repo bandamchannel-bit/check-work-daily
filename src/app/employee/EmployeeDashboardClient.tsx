@@ -908,9 +908,18 @@ export default function EmployeeDashboardClient({
                 <span>ແຍກຕາມໂປຣເຈັກ ({projectGroups.length})</span>
               </button>
             </div>
-            <span className="text-xs text-gray-400 hidden sm:block">
-              ⏳ ເວລານັບຖອຍຫຼັງອັບເດດແບບ Real-time ທຸກວິນາທີ
-            </span>
+            <div className="flex items-center gap-3 ml-auto">
+              <Link
+                href="/employee/calendar"
+                className="flex items-center gap-1.5 px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-xs font-bold transition-all shadow-sm border border-purple-100"
+              >
+                <span>📅</span>
+                <span>ປະຕິທິນ (Calendar)</span>
+              </Link>
+              <span className="text-xs text-gray-400 hidden sm:block">
+                ⏳ ເວລານັບຖອຍຫຼັງອັບເດດແບບ Real-time 
+              </span>
+            </div>
           </div>
         )}
 
