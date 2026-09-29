@@ -65,7 +65,7 @@ export default function CalendarClient({
 
     // Empty cells before the 1st
     for (let i = 0; i < firstDayOfMonth; i++) {
-      cells.push(<div key={`empty-${i}`} className="min-h-[120px] bg-gray-50/50 border border-gray-100 rounded-xl"></div>)
+      cells.push(<div key={`empty-${i}`} className="min-h-[80px] sm:min-h-[120px] bg-gray-50/50 border border-gray-100 rounded-xl"></div>)
     }
 
     // Days of the month
@@ -75,17 +75,17 @@ export default function CalendarClient({
       const isToday = isCurrentMonth && day === todayDate
 
       cells.push(
-        <div key={day} className={`min-h-[140px] flex flex-col bg-white border ${isToday ? 'border-blue-400 shadow-sm ring-1 ring-blue-400' : 'border-gray-200'} rounded-xl overflow-hidden transition-all hover:border-blue-300`}>
+        <div key={day} className={`min-h-[100px] sm:min-h-[140px] flex flex-col bg-white border ${isToday ? 'border-blue-400 shadow-sm ring-1 ring-blue-400' : 'border-gray-200'} rounded-xl overflow-hidden transition-all hover:border-blue-300`}>
           {/* Header */}
-          <div className={`px-3 py-2 flex items-center justify-between border-b ${isToday ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-gray-50/50 border-gray-100 text-gray-500'}`}>
-            <span className={`text-sm font-bold ${isToday ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center' : ''}`}>{day}</span>
+          <div className={`px-1.5 sm:px-3 py-1.5 sm:py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b ${isToday ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-gray-50/50 border-gray-100 text-gray-500'}`}>
+            <span className={`text-xs sm:text-sm font-bold ${isToday ? 'bg-blue-600 text-white w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center' : 'ml-1 sm:ml-0'}`}>{day}</span>
             {dayTasks.length > 0 && (
-              <span className="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{dayTasks.length} ວຽກ</span>
+              <span className="text-[9px] sm:text-[10px] font-bold bg-gray-200 text-gray-600 px-1.5 sm:px-2 py-0.5 rounded-full">{dayTasks.length} ວຽກ</span>
             )}
           </div>
           
           {/* Tasks List */}
-          <div className="p-2 flex-1 overflow-y-auto space-y-1.5 custom-scrollbar max-h-[140px]">
+          <div className="p-1 sm:p-2 flex-1 overflow-y-auto space-y-1 custom-scrollbar max-h-[140px]">
             {dayTasks.map(task => {
               const pName = task.platform?.pageName || task.platform?.name || task.platformName
               const uName = task.user?.name || task.userName
@@ -94,29 +94,29 @@ export default function CalendarClient({
                 <div 
                   key={task.id} 
                   onClick={() => setSelectedTask(task)}
-                  className={`cursor-pointer transition-all hover:scale-[1.02] text-[11px] px-2 py-1.5 rounded-lg border leading-tight ${
+                  className={`cursor-pointer transition-all hover:scale-[1.02] text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md sm:rounded-lg border leading-tight ${
                     task.status === 'DONE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 opacity-80' :
                     (new Date(task.dueDate).getTime() < new Date().getTime()) ? 'bg-red-50 border-red-200 text-red-700 font-bold shadow-sm' :
                     'bg-blue-50 border-blue-200 text-blue-700 font-semibold shadow-sm hover:shadow-md'
                   }`}
                   title={`${task.title} - ${uName}`}
                 >
-                  <div className="flex items-start gap-1.5 mb-1">
+                  <div className="flex items-start gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
                     {task.platform?.logoUrl ? (
-                      <img src={task.platform.logoUrl} className="w-4 h-4 rounded-full object-cover shrink-0 mt-0.5" alt="" />
+                      <img src={task.platform.logoUrl} className="w-3 h-3 sm:w-4 sm:h-4 rounded-full object-cover shrink-0 mt-0.5" alt="" />
                     ) : (
-                      <div className="w-4 h-4 rounded-full bg-black/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-[8px] font-bold">{pName?.charAt(0) || 'P'}</span>
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-black/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[7px] sm:text-[8px] font-bold">{pName?.charAt(0) || 'P'}</span>
                       </div>
                     )}
                     <span className={`truncate flex-1 ${task.status === 'DONE' ? 'line-through' : ''}`}>{task.title}</span>
                   </div>
-                  <div className="text-[9px] opacity-70 flex justify-between items-center pl-5">
-                    <span className="truncate">{pName}</span>
+                  <div className="text-[8px] sm:text-[9px] opacity-70 flex justify-between items-center pl-4 sm:pl-5">
+                    <span className="truncate hidden sm:inline">{pName}</span>
                     {task.status !== 'DONE' && new Date(task.dueDate).getTime() < new Date().getTime() && (
-                      <span className="text-red-600 font-black animate-pulse">⏰ ຊ້າ</span>
+                      <span className="text-red-600 font-black animate-pulse">⏰ຊ້າ</span>
                     )}
-                    <span className="truncate max-w-[50px] text-right font-medium">{uName}</span>
+                    <span className="truncate max-w-[40px] sm:max-w-[50px] text-right font-medium ml-auto">{uName}</span>
                   </div>
                 </div>
               )
@@ -133,7 +133,7 @@ export default function CalendarClient({
   const isEmployeeMode = typeof window !== 'undefined' ? window.location.pathname.startsWith('/employee') : false
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-300">
+    <div className="flex flex-col animate-in fade-in duration-300 w-full">
       {/* Admin Dropdown */}
       {isAdmin && isEmployeeMode && employees && employees.length > 0 && (
         <div className="flex items-center gap-2 mb-4 bg-amber-50 p-3 rounded-2xl border border-amber-200">
@@ -160,7 +160,7 @@ export default function CalendarClient({
           <p className="text-gray-500 mt-1 text-sm font-medium">ເບິ່ງພາບລວມຂອງໜ້າວຽກທັງໝົດໃນແຕ່ລະເດືອນ {activeEmployee ? `ຂອງ ${activeEmployee.name}` : ''} (ໂຫຼດມາ {initialTasks.length} ວຽກ)</p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white p-1 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex items-center gap-2 bg-white p-1 rounded-2xl shadow-sm border border-gray-100 w-fit">
           <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-500">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
@@ -182,18 +182,19 @@ export default function CalendarClient({
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 flex-1">
+      <div className="bg-white rounded-3xl p-3 sm:p-6 shadow-sm border border-gray-100 w-full overflow-hidden">
         {/* Days of week */}
-        <div className="grid grid-cols-7 gap-2 sm:gap-4 mb-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-4 mb-2">
           {dayNames.map((day, idx) => (
-            <div key={day} className={`text-center text-xs font-bold uppercase tracking-wider py-2 ${idx === 0 || idx === 6 ? 'text-red-400' : 'text-gray-500'}`}>
-              {day}
+            <div key={day} className={`text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider py-1 sm:py-2 ${idx === 0 || idx === 6 ? 'text-red-400' : 'text-gray-500'}`}>
+              <span className="sm:hidden">{day.replace('ອາທິດ', 'ອາ.').replace('ຈັນ', 'ຈ.').replace('ອັງຄານ', 'ອ.').replace('ພຸດ', 'ພ.').replace('ພະຫັດ', 'ພຫ.').replace('ສຸກ', 'ສ.').replace('ເສົາ', 'ສ.')}</span>
+              <span className="hidden sm:inline">{day}</span>
             </div>
           ))}
         </div>
         
         {/* Days grid */}
-        <div className="grid grid-cols-7 gap-2 sm:gap-4">
+        <div className="grid grid-cols-7 gap-1 sm:gap-4 pb-2">
           {renderCells()}
         </div>
       </div>

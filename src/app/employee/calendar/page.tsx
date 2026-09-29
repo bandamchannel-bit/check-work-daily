@@ -62,7 +62,7 @@ export default async function EmployeeCalendarPage({
   }))
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)]">
+    <div className="flex flex-col min-h-[calc(100vh-80px)] pb-6">
       <div className="mb-4">
         <Link href={`/employee${targetUserId !== session.userId ? `?userId=${targetUserId}` : ''}`} className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 w-fit">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,7 @@ export default async function EmployeeCalendarPage({
           ກັບຄືນໜ້າຫຼັກ (Back to Dashboard)
         </Link>
       </div>
-      <div className="flex-1 bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
+      <div className="flex-1">
         <CalendarClient 
           initialTasks={serializedTasks} 
           currentUserId={session.userId} 
