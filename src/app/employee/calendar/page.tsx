@@ -42,7 +42,7 @@ export default async function EmployeeCalendarPage() {
     })),
     attachments: t.attachments.map((a: any) => ({
       ...a,
-      uploadedAt: a.uploadedAt.toISOString()
+      createdAt: a.createdAt.toISOString()
     }))
   }))
 

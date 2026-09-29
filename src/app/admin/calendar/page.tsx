@@ -38,7 +38,7 @@ export default async function AdminCalendarPage() {
     })),
     attachments: t.attachments.map((a: any) => ({
       ...a,
-      uploadedAt: a.uploadedAt.toISOString()
+      createdAt: a.createdAt.toISOString()
     }))
   }))
 
