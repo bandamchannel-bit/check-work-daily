@@ -31,6 +31,16 @@ export default async function AdminDashboard() {
   
   const completionRate = tasksToday > 0 ? Math.round((completedToday / tasksToday) * 100) : 0
 
+  const recentTasks = await prisma.task.findMany({
+    take: 5,
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      user: { select: { name: true } },
+      platform: { select: { name: true, pageName: true, logoUrl: true } },
+      project: { select: { name: true } }
+    }
+  })
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       
@@ -138,13 +148,60 @@ export default async function AdminDashboard() {
             ເບິ່ງວຽກທັງໝົດ &rarr;
           </Link>
         </div>
-        <div className="p-8 text-center bg-white flex flex-col items-center justify-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-             <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+        {recentTasks.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {recentTasks.map(task => {
+              const platformName = task.platform?.pageName || task.platform?.name || task.platformName
+              return (
+                <div key={task.id} className="p-4 hover:bg-gray-50/50 transition-colors flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 min-w-0">
+                    {task.platform?.logoUrl ? (
+                      <img src={task.platform.logoUrl} className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-sm border border-gray-100" alt="" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200">
+                        <span className="text-gray-500 font-bold">{platformName?.charAt(0) || 'P'}</span>
+                      </div>
+                    )}
+                    <div className="min-w-0 flex flex-col">
+                      <span className="text-sm font-semibold text-gray-900 truncate">{task.title}</span>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                        <span className="truncate max-w-[120px]">{platformName}</span>
+                        <span>•</span>
+                        <span className="font-medium text-blue-600">{task.user?.name || 'Unassigned'}</span>
+                        {task.project && (
+                          <>
+                            <span>•</span>
+                            <span className="truncate max-w-[100px] text-gray-400">{task.project.name}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full ${
+                      task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' :
+                      task.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-700' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {task.status === 'DONE' ? 'ສຳເລັດ' : task.status === 'IN_PROGRESS' ? 'ກຳລັງເຮັດ' : 'ລໍຖ້າເລີ່ມ'}
+                    </span>
+                    <span className="text-xs text-gray-400 font-medium hidden sm:block">
+                      {new Date(task.updatedAt).toLocaleDateString('lo-LA')}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-          <h3 className="text-gray-900 font-semibold mb-1">ເລີ່ມມອບໝາຍວຽກໃໝ່</h3>
-          <p className="text-gray-500 text-sm max-w-sm mx-auto">ເຂົ້າໄປທີ່ໜ້າ "ໂປຣເຈັກ" ຫຼື "ມອບໝາຍວຽກ" ເພື່ອເລີ່ມຕົ້ນການເຮັດວຽກຂອງມື້ນີ້.</p>
-        </div>
+        ) : (
+          <div className="p-8 text-center bg-white flex flex-col items-center justify-center">
+            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+               <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+            </div>
+            <h3 className="text-gray-900 font-semibold mb-1">ເລີ່ມມອບໝາຍວຽກໃໝ່</h3>
+            <p className="text-gray-500 text-sm max-w-sm mx-auto">ເຂົ້າໄປທີ່ໜ້າ "ໂປຣເຈັກ" ຫຼື "ມອບໝາຍວຽກ" ເພື່ອເລີ່ມຕົ້ນການເຮັດວຽກຂອງມື້ນີ້.</p>
+          </div>
+        )}
       </div>
     </div>
   )
