@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { motivationalQuotes } from '@/lib/quotes'
 import Link from 'next/link'
 import { completeTask, changeTaskStatus } from '@/app/actions/tasks'
 import TaskDetailModal from '@/components/TaskDetailModal'
@@ -727,6 +728,8 @@ export default function EmployeeDashboardClient({
   const [proofTask, setProofTask] = useState<Task | null>(null)
   const [changingStatus, setChangingStatus] = useState<string | null>(null)
   const [now, setNow] = useState(0)
+  
+  const [randomQuote, setRandomQuote] = useState('ຕິດຕາມເວລານັບຖອຍຫຼັງສົ່ງວຽກ ⏰ ຢ່າປ່ອຍໃຫ້ກາຍກຳນົດ!')
 
   // Real-time ticking clock (ticks every 1,000ms = 1 second)
   useEffect(() => {
@@ -734,6 +737,10 @@ export default function EmployeeDashboardClient({
     const interval = setInterval(() => {
       setNow(Date.now())
     }, 1000)
+    
+    // Pick random quote on client to avoid hydration mismatch
+    setRandomQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)])
+    
     return () => clearInterval(interval)
   }, [])
 
@@ -869,7 +876,7 @@ export default function EmployeeDashboardClient({
             <div>
               <p suppressHydrationWarning className="text-blue-300 text-[11px] font-semibold mb-1">{today}</p>
               <h1 suppressHydrationWarning className="text-xl sm:text-2xl font-extrabold tracking-tight">{greeting}, <span className="text-blue-300">{isAdmin && activeEmployeeName ? activeEmployeeName : userName}</span></h1>
-              <p className="text-blue-200/70 text-xs mt-1">ຕິດຕາມເວລານັບຖອຍຫຼັງສົ່ງວຽກ ⏰ ຢ່າປ່ອຍໃຫ້ກາຍກຳນົດ!</p>
+              <p className="text-blue-200/70 text-xs mt-1 transition-opacity duration-1000">{randomQuote}</p>
             </div>
             <div className="flex items-center gap-2.5 flex-shrink-0 flex-wrap">
               {[
