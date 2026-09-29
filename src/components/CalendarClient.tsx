@@ -5,12 +5,14 @@ import TaskDetailModal from '@/components/TaskDetailModal'
 
 export default function CalendarClient({ 
   initialTasks, 
+  initialAutoTasks = [],
   currentUserId, 
   isAdmin,
   targetUserId,
   employees
 }: { 
   initialTasks: any[],
+  initialAutoTasks?: any[],
   currentUserId: string,
   isAdmin: boolean,
   targetUserId?: string,
@@ -44,15 +46,60 @@ export default function CalendarClient({
   // Group tasks by YYYY-MM-DD
   const tasksByDate = useMemo(() => {
     const map = new Map<string, any[]>()
+    
+    // 1. Add real tasks
     initialTasks.forEach(task => {
-      // Assuming dueDate is stored in UTC but we want local day string
       const dateObj = new Date(task.dueDate)
       const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`
       if (!map.has(dateStr)) map.set(dateStr, [])
       map.get(dateStr)!.push(task)
     })
+
+    // 2. Generate virtual Auto-Tasks for the current viewed month
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateObj = new Date(year, month, day)
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      const dayOfWeekStr = dateObj.getDay().toString() // 0 = Sunday
+
+      initialAutoTasks.forEach(autoTask => {
+        const activeDays = (autoTask.daysOfWeek || "").split(',')
+        if (activeDays.includes(dayOfWeekStr)) {
+          // Check if a real task already exists for this auto-task on this day
+          const existingRealTasks = map.get(dateStr) || []
+          const hasRealTask = existingRealTasks.some(rt => 
+            rt.title === autoTask.title && 
+            rt.userId === autoTask.userId && 
+            rt.platformId === autoTask.platformId
+          )
+
+          if (!hasRealTask) {
+            if (!map.has(dateStr)) map.set(dateStr, [])
+            
+            // Create a virtual task
+            const [hours, minutes] = (autoTask.timeOfDay || '00:00').split(':')
+            const virtualDate = new Date(year, month, day, parseInt(hours), parseInt(minutes))
+            
+            map.get(dateStr)!.push({
+              id: `auto-${autoTask.id}-${dateStr}`,
+              title: `🔄 ${autoTask.title}`,
+              status: 'AUTO_VIRTUAL',
+              dueDate: virtualDate.toISOString(),
+              platform: autoTask.platform,
+              platformId: autoTask.platformId,
+              user: autoTask.user,
+              userId: autoTask.userId,
+              isVirtual: true
+            })
+          }
+        }
+      })
+    }
     return map
-  }, [initialTasks])
+  }, [initialTasks, initialAutoTasks, currentDate])
 
   const renderCells = () => {
     const cells = []
@@ -93,13 +140,20 @@ export default function CalendarClient({
               return (
                 <div 
                   key={task.id} 
-                  onClick={() => setSelectedTask(task)}
+                  onClick={() => {
+                    if (task.isVirtual) {
+                      alert('ວຽກນີ້ເປັນວຽກອັດຕະໂນມັດທີ່ຖືກຕັ້ງຄ່າໄວ້ລ່ວງໜ້າ (Auto-Task) ລະບົບຈະສ້າງວຽກຈິງໃຫ້ເມື່ອຮອດມື້ກຳນົດ.')
+                    } else {
+                      setSelectedTask(task)
+                    }
+                  }}
                   className={`cursor-pointer transition-all hover:scale-[1.02] text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-md sm:rounded-lg border leading-tight ${
+                    task.isVirtual ? 'bg-gray-50 border-dashed border-gray-300 text-gray-600 opacity-80' :
                     task.status === 'DONE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 opacity-80' :
                     (new Date(task.dueDate).getTime() < new Date().getTime()) ? 'bg-red-50 border-red-200 text-red-700 font-bold shadow-sm' :
                     'bg-blue-50 border-blue-200 text-blue-700 font-semibold shadow-sm hover:shadow-md'
                   }`}
-                  title={`${task.title} - ${uName}`}
+                  title={task.isVirtual ? `ວຽກອັດຕະໂນມັດ: ${task.title}` : `${task.title} - ${uName}`}
                 >
                   <div className="flex items-start gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
                     {task.platform?.logoUrl ? (

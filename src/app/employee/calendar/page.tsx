@@ -61,6 +61,23 @@ export default async function EmployeeCalendarPage({
     }))
   }))
 
+  const autoTasks = await prisma.dailyTaskConfig.findMany({
+    where: {
+      userId: targetUserId,
+      isActive: true
+    },
+    include: {
+      user: { select: { id: true, name: true } },
+      platform: { select: { id: true, name: true, pageName: true, logoUrl: true } }
+    }
+  })
+
+  const serializedAutoTasks = autoTasks.map((a: any) => ({
+    ...a,
+    createdAt: a.createdAt.toISOString(),
+    updatedAt: a.updatedAt.toISOString()
+  }))
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-80px)] pb-6">
       <div className="mb-4">
@@ -74,6 +91,7 @@ export default async function EmployeeCalendarPage({
       <div className="flex-1">
         <CalendarClient 
           initialTasks={serializedTasks} 
+          initialAutoTasks={serializedAutoTasks}
           currentUserId={session.userId} 
           isAdmin={isAdmin}
           targetUserId={targetUserId}

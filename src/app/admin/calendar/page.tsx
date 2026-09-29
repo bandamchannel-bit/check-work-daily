@@ -42,9 +42,24 @@ export default async function AdminCalendarPage() {
     }))
   }))
 
+  const autoTasks = await prisma.dailyTaskConfig.findMany({
+    where: { isActive: true },
+    include: {
+      user: { select: { id: true, name: true } },
+      platform: { select: { id: true, name: true, pageName: true, logoUrl: true } }
+    }
+  })
+
+  const serializedAutoTasks = autoTasks.map((a: any) => ({
+    ...a,
+    createdAt: a.createdAt.toISOString(),
+    updatedAt: a.updatedAt.toISOString()
+  }))
+
   return (
     <CalendarClient 
       initialTasks={serializedTasks} 
+      initialAutoTasks={serializedAutoTasks}
       currentUserId={session.userId!} 
       isAdmin={true} 
     />
