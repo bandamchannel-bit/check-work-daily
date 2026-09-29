@@ -6,11 +6,15 @@ import TaskDetailModal from '@/components/TaskDetailModal'
 export default function CalendarClient({ 
   initialTasks, 
   currentUserId, 
-  isAdmin 
+  isAdmin,
+  targetUserId,
+  employees
 }: { 
   initialTasks: any[],
   currentUserId: string,
-  isAdmin: boolean
+  isAdmin: boolean,
+  targetUserId?: string,
+  employees?: any[]
 }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedTask, setSelectedTask] = useState<any>(null)
@@ -125,14 +129,35 @@ export default function CalendarClient({
     return cells
   }
 
+  const activeEmployee = employees?.find(e => e.id === targetUserId)
+  const isEmployeeMode = typeof window !== 'undefined' ? window.location.pathname.startsWith('/employee') : false
 
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-300">
+      {/* Admin Dropdown */}
+      {isAdmin && isEmployeeMode && employees && employees.length > 0 && (
+        <div className="flex items-center gap-2 mb-4 bg-amber-50 p-3 rounded-2xl border border-amber-200">
+          <span className="text-amber-800 font-bold text-sm">👀 ກວດປະຕິທິນພະນັກງານ:</span>
+          <select
+            value={targetUserId}
+            onChange={(e) => {
+              window.location.href = `/employee/calendar?userId=${e.target.value}`
+            }}
+            className="bg-white border border-amber-300 text-amber-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block w-full sm:w-auto p-2"
+          >
+            <option value={currentUserId}>-- ຕົວຂ້ອຍເອງ (Admin) --</option>
+            {employees.map(emp => (
+              <option key={emp.id} value={emp.id}>{emp.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">ປະຕິທິນໜ້າວຽກ (Calendar)</h1>
-          <p className="text-gray-500 mt-1 text-sm font-medium">ເບິ່ງພາບລວມຂອງໜ້າວຽກທັງໝົດໃນແຕ່ລະເດືອນ</p>
+          <p className="text-gray-500 mt-1 text-sm font-medium">ເບິ່ງພາບລວມຂອງໜ້າວຽກທັງໝົດໃນແຕ່ລະເດືອນ {activeEmployee ? `ຂອງ ${activeEmployee.name}` : ''} (ໂຫຼດມາ {initialTasks.length} ວຽກ)</p>
         </div>
         
         <div className="flex items-center gap-2 bg-white p-1 rounded-2xl shadow-sm border border-gray-100">

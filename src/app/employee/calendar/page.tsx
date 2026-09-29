@@ -4,13 +4,28 @@ import { redirect } from 'next/navigation'
 import CalendarClient from '@/components/CalendarClient'
 import Link from 'next/link'
 
-export default async function EmployeeCalendarPage() {
+export default async function EmployeeCalendarPage({ 
+  searchParams 
+}: { 
+  searchParams?: Promise<{ userId?: string }> 
+}) {
   const session = await getSession()
   if (!session || !session.userId) redirect('/login')
 
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const isAdmin = session.userRole === 'ADMIN'
+
+  const employees = isAdmin 
+    ? await prisma.user.findMany({ where: { role: 'USER' }, orderBy: { name: 'asc' } })
+    : []
+
+  const targetUserId: string = (isAdmin && resolvedSearchParams.userId)
+    ? resolvedSearchParams.userId
+    : (isAdmin && employees.length > 0 ? employees[0].id : session.userId)
+
   const tasks = await prisma.task.findMany({
     where: {
-      userId: session.userId
+      userId: targetUserId
     },
     include: {
       user: { select: { id: true, name: true } },
@@ -49,7 +64,7 @@ export default async function EmployeeCalendarPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
       <div className="mb-4">
-        <Link href="/employee" className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 w-fit">
+        <Link href={`/employee${targetUserId !== session.userId ? `?userId=${targetUserId}` : ''}`} className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 w-fit">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -60,7 +75,9 @@ export default async function EmployeeCalendarPage() {
         <CalendarClient 
           initialTasks={serializedTasks} 
           currentUserId={session.userId} 
-          isAdmin={session.userRole === 'ADMIN'} 
+          isAdmin={isAdmin}
+          targetUserId={targetUserId}
+          employees={employees}
         />
       </div>
     </div>
