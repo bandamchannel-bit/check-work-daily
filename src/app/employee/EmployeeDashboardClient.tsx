@@ -567,7 +567,7 @@ function FocusedTaskList({ title, subtitle, description, icon, tasks, nowTs, onB
         ))}
       </div>
 
-      {/* Task list */}
+      {/* Task list / Kanban Board */}
       {filtered.length === 0 ? (
         <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
           <p className="text-4xl mb-2">{filter === 'DONE' ? '🎉' : '📭'}</p>
@@ -575,99 +575,126 @@ function FocusedTaskList({ title, subtitle, description, icon, tasks, nowTs, onB
           <button onClick={() => setFilter('ALL')} className="mt-3 text-xs text-blue-600 font-semibold hover:underline">← ກັບໄປດູທັງໝົດ</button>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <ul className="divide-y divide-gray-50">
-            {filtered.map(task => {
-              const isLate = task.status !== 'DONE' && (nowTs > 0 ? new Date(task.dueDate).getTime() < nowTs : false)
-              return (
-                <li key={task.id} className={`transition-colors ${isLate ? 'bg-red-50/30' : 'hover:bg-gray-50/60'}`}>
-                  <div className="px-5 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-                    {/* Left: task info */}
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${task.status === 'DONE' ? 'bg-emerald-500' : isLate ? 'bg-red-500 animate-ping' : 'bg-blue-500'}`}/>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className={`font-bold text-sm leading-snug ${task.status === 'DONE' ? 'line-through text-gray-400' : 'text-gray-900'}`}>{task.title}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-4">
+          
+          {/* Helper function to render a Kanban column */}
+          {[
+            { id: 'TODO', title: '📋 ລໍຖ້າ (To Do)', color: 'bg-gray-100 text-gray-800 border-gray-200' },
+            { id: 'IN_PROGRESS', title: '⏳ ກຳລັງເຮັດ (In Progress)', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+            { id: 'REVIEW', title: '🔍 ລໍຖ້າກວດ (Review)', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+            { id: 'DONE', title: '✅ ສຳເລັດ (Done)', color: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
+          ].map(col => {
+            if (filter !== 'ALL' && filter !== 'LATE' && filter !== col.id) return null;
+            
+            const colTasks = filtered.filter(t => t.status === col.id);
+            if (filter === 'LATE' && colTasks.length === 0) return null;
+
+            return (
+              <div key={col.id} className="flex flex-col min-w-[280px]">
+                <div className={`px-4 py-3 rounded-t-2xl border-t border-x font-extrabold text-sm flex items-center justify-between shadow-sm ${col.color}`}>
+                  <span>{col.title}</span>
+                  <span className="bg-white/70 text-gray-700 px-2.5 py-0.5 rounded-full text-xs shadow-sm">{colTasks.length}</span>
+                </div>
+                <div className={`flex-1 p-3 bg-gray-50/80 border-x border-b border-gray-200 rounded-b-2xl space-y-3 shadow-inner ${colTasks.length === 0 ? 'min-h-[150px]' : ''}`}>
+                  {colTasks.length === 0 && (
+                    <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium border-2 border-dashed border-gray-200 rounded-xl">
+                      ຫວ່າງເປົ່າ
+                    </div>
+                  )}
+                  {colTasks.map(task => {
+                    const isLate = task.status !== 'DONE' && (nowTs > 0 ? new Date(task.dueDate).getTime() < nowTs : false)
+                    return (
+                      <div key={task.id} className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md border ${isLate ? 'border-red-300 shadow-red-100' : 'border-gray-200'} transition-all group relative cursor-pointer`} onClick={(e) => {
+                        // Avoid triggering if clicked on select or action buttons
+                        if ((e.target as HTMLElement).tagName !== 'SELECT' && (e.target as HTMLElement).tagName !== 'BUTTON') {
+                          onViewDetail(task);
+                        }
+                      }}>
+                        {isLate && <div className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse border-2 border-white">⚠️ ຊ້າ</div>}
+                        
+                        <div className="flex justify-between items-start gap-2 mb-2">
+                          <h3 className={`font-bold text-sm leading-tight ${task.status === 'DONE' ? 'line-through text-gray-400' : 'text-gray-900 group-hover:text-blue-700 transition-colors'}`}>{task.title}</h3>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-md font-bold truncate max-w-full">
+                            📱 {task.platform.pageName}
+                          </span>
                           {task.project && (
-                            <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.2 rounded-full font-bold">
+                            <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-100 px-2 py-0.5 rounded-md font-bold truncate max-w-[120px]">
                               📁 {task.project.name}
                             </span>
                           )}
-                          <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.2 rounded-full font-bold">
-                            📱 {task.platform.pageName}
-                          </span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                          {/* Status badge */}
-                          {task.status === 'DONE' && <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">✅ ສຳເລັດ</span>}
-                          {isLate && <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-red-100 text-red-700 border border-red-200 animate-pulse">⚠️ ຊັກຊ້າ</span>}
-                          {task.status === 'IN_PROGRESS' && !isLate && <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-200">⏳ ກຳລັງເຮັດ</span>}
-                          {task.status === 'REVIEW' && <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-purple-100 text-purple-700 border border-purple-200">🔍 ລໍຖ້າກວດ</span>}
-                          {task.status === 'TODO' && !isLate && <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-gray-100 text-gray-600 border border-gray-200">📋 ລໍຖ້າ</span>}
 
-                          {/* Live Countdown Pill for this task */}
-                          {task.status !== 'DONE' && (
-                            <LiveCountdown dueDate={task.dueDate} nowTs={nowTs} />
+                        <div className="flex items-center justify-between text-[10px] text-gray-500 font-bold mb-3 border-t border-gray-100 pt-2.5">
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-400 text-xs">🕒</span>
+                            <span>{new Date(task.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          {task.status !== 'DONE' && <LiveCountdown dueDate={task.dueDate} nowTs={nowTs} />}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                          {task.status !== 'DONE' ? (
+                            <>
+                              <select
+                                value={task.status}
+                                disabled={changingStatus === task.id}
+                                onChange={e => onStatusChange(task.id, e.target.value)}
+                                className="text-[11px] font-extrabold bg-gray-50 border border-gray-200 rounded-xl px-2 py-1.5 focus:outline-none flex-1 cursor-pointer disabled:opacity-50 text-gray-700 hover:bg-gray-100 transition-colors"
+                              >
+                                <option value="TODO">📋 ລໍຖ້າ</option>
+                                <option value="IN_PROGRESS">⏳ ກຳລັງເຮັດ</option>
+                                <option value="REVIEW">🔍 ກວດ</option>
+                                <option value="DONE">✅ ສຳເລັດ</option>
+                              </select>
+                              {task.status === 'TODO' && (
+                                <button onClick={() => onStatusChange(task.id, 'IN_PROGRESS')} className="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold px-2 py-1.5 rounded-xl transition-colors shrink-0 shadow-sm shadow-blue-500/20 w-[70px]">
+                                  ເລີ່ມເຮັດ
+                                </button>
+                              )}
+                              {(task.status === 'IN_PROGRESS' || task.status === 'REVIEW') && (
+                                <button onClick={() => onMarkDone(task)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2 py-1.5 rounded-xl transition-colors shrink-0 shadow-sm shadow-emerald-500/20 w-[70px]">
+                                  ຈົບວຽກ
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex items-center justify-between bg-emerald-50 w-full px-3 py-2 rounded-xl border border-emerald-100">
+                              <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
+                                <span className="bg-emerald-200 w-4 h-4 rounded-full flex items-center justify-center text-[10px]">✓</span> 
+                                ປິດຈົບວຽກ
+                              </span>
+                              {task.proofImage && (
+                                <button onClick={() => {
+                                  const w = window.open();
+                                  if (w) {
+                                    w.document.body.style.margin = '0';
+                                    w.document.body.style.background = '#0f172a';
+                                    w.document.body.style.display = 'flex';
+                                    w.document.body.style.justifyContent = 'center';
+                                    const img = w.document.createElement('img');
+                                    img.src = task.proofImage || '';
+                                    img.style.maxWidth = '100%';
+                                    img.style.objectFit = 'contain';
+                                    w.document.body.appendChild(img);
+                                  }
+                                }} className="text-[11px] text-emerald-600 hover:underline font-extrabold flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-emerald-200 shadow-sm">
+                                  📸 ຫຼັກຖານ
+                                </button>
+                              )}
+                            </div>
                           )}
-
-                          <span className="text-[11px] text-gray-500 font-medium">
-                            🕐 ກຳນົດ: {new Date(task.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-
-                          {task.proofUrl && <a href={task.proofUrl} target="_blank" rel="noreferrer" className="text-[11px] text-blue-600 font-bold hover:underline">🔗 ດູໂພສ</a>}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Right: actions */}
-                    <div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
-                      <button onClick={() => onViewDetail(task)} className="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors border border-gray-200" title="ລາຍລະອຽດ, ຄອມເມັ້ນ, ໄຟລ໌ແນບ">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                      </button>
-                      {task.status !== 'DONE' ? (
-                        <>
-                          <select
-                            value={task.status}
-                            disabled={changingStatus === task.id}
-                            onChange={e => onStatusChange(task.id, e.target.value)}
-                            className="text-xs font-semibold bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50"
-                          >
-                            <option value="TODO">📋 ລໍຖ້າ</option>
-                            <option value="IN_PROGRESS">⏳ ກຳລັງເຮັດ</option>
-                            <option value="REVIEW">🔍 ລໍຖ້າກວດ</option>
-                            <option value="DONE">✅ ສຳເລັດ...</option>
-                          </select>
-                          <button onClick={() => onMarkDone(task)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1.5 whitespace-nowrap active:scale-95">
-                            ✅ ສຳເລັດ
-                          </button>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          {task.proofImage && (
-                            <button onClick={() => {
-                              const w = window.open();
-                              if (w) {
-                                w.document.body.style.margin = '0';
-                                w.document.body.style.background = '#0f172a';
-                                w.document.body.style.display = 'flex';
-                                w.document.body.style.justifyContent = 'center';
-                                const img = w.document.createElement('img');
-                                img.src = task.proofImage || '';
-                                img.style.maxWidth = '100%';
-                                img.style.objectFit = 'contain';
-                                w.document.body.appendChild(img);
-                              }
-                            }} className="text-xs text-purple-600 hover:underline font-semibold flex items-center gap-1">📸 ຮູບຫຼັກຖານ</button>
-                          )}
-                          <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">ສຳເລັດ 🎉</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
@@ -910,7 +937,7 @@ export default function EmployeeDashboardClient({
             </div>
             <div className="flex items-center gap-3 ml-auto">
               <Link
-                href="/employee/calendar"
+                href={targetUserId && targetUserId !== currentUserId ? `/employee/calendar?userId=${targetUserId}` : `/employee/calendar`}
                 className="flex items-center gap-1.5 px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-xs font-bold transition-all shadow-sm border border-purple-100"
               >
                 <span>📅</span>
