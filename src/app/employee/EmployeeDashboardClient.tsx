@@ -243,6 +243,30 @@ function ProofModal({ task, onClose, onSuccess }: { task: Task; onClose: () => v
   )
 }
 
+// ─── Pending Tasks Popup Modal ────────────────────────────────────────────────
+function PendingTasksPopup({ pendingCount, onClose }: { pendingCount: number; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-300 border-2 border-red-100">
+        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 relative">
+          <div className="absolute inset-0 bg-red-100 rounded-full animate-ping opacity-20"></div>
+          <span className="text-4xl drop-shadow-sm">⏰</span>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2 font-['Noto_Sans_Lao',sans-serif]">ແຈ້ງເຕືອນວຽກຄ້າງ!</h3>
+        <p className="text-gray-600 mb-8 font-['Noto_Sans_Lao',sans-serif] leading-relaxed">
+          ປັດຈຸບັນທ່ານມີ <span className="font-bold text-red-600 text-lg">{pendingCount} ວຽກ</span> ທີ່ຍັງບໍ່ທັນສຳເລັດ. <br/> ກະລຸນາກວດສອບ ແລະ ອັບເດດສະຖານະວຽກຂອງທ່ານ.
+        </p>
+        <button
+          onClick={onClose}
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] font-['Noto_Sans_Lao',sans-serif]"
+        >
+          ຮັບຊາບ ແລະ ໄປເຮັດວຽກ 🚀
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Deadline Alert Bottom Bar ─────────────────────────────────────────────────
 function DeadlineAlertBar({ tasks, nowTs }: { tasks: Task[]; nowTs: number }) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
@@ -691,6 +715,35 @@ export default function EmployeeDashboardClient({
   const late  = now > 0 ? tasks.filter(t => t.status !== 'DONE' && new Date(t.dueDate).getTime() < now).length : 0
   const pending = total - done
 
+  // -- Pending Tasks Popup Logic --
+  const [showPendingPopup, setShowPendingPopup] = useState(false)
+  const pendingCountRef = useRef(pending)
+
+  // Keep ref up to date
+  useEffect(() => {
+    pendingCountRef.current = pending
+  }, [pending])
+
+  useEffect(() => {
+    // Show popup shortly after initial load if pending > 0
+    if (pendingCountRef.current > 0) {
+      const initTimer = setTimeout(() => {
+        setShowPendingPopup(true)
+      }, 1500)
+      return () => clearTimeout(initTimer)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Re-check and show popup every 30 minutes (30 * 60 * 1000 ms)
+    const interval = setInterval(() => {
+      if (pendingCountRef.current > 0) {
+        setShowPendingPopup(true)
+      }
+    }, 30 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   const greeting = now > 0
     ? (new Date(now).getHours() < 12 ? 'ອາລຸນສະຫວັດ ☀️' : new Date(now).getHours() < 17 ? 'ສະບາຍດີ 👋' : 'ສະບາຍດີຕອນແລງ 🌙')
     : 'ສະບາຍດີ 👋'
@@ -987,6 +1040,14 @@ export default function EmployeeDashboardClient({
         currentUserId={currentUserId}
         isAdmin={isAdmin}
       />
+
+      {/* ── Pending Tasks Popup ── */}
+      {showPendingPopup && (
+        <PendingTasksPopup 
+          pendingCount={pending} 
+          onClose={() => setShowPendingPopup(false)} 
+        />
+      )}
     </>
   )
 }
