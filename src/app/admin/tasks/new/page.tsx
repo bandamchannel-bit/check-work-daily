@@ -10,8 +10,17 @@ export default async function NewTaskPage({
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : {}
   const users = await prisma.user.findMany({ where: { role: 'USER' } })
-  const platforms = await prisma.platform.findMany()
-
+  const platforms = await prisma.platform.findMany({
+    include: {
+      user: { select: { name: true } },
+      _count: {
+        select: {
+          tasks: { where: { status: { not: 'DONE' } } }
+        }
+      }
+    },
+    orderBy: { name: 'asc' }
+  })
   return (
     <div>
       <div className="mb-6 flex justify-between items-center">

@@ -20,6 +20,9 @@ export default function TaskForm({
   const [files, setFiles] = useState<File[]>([])
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [userSearch, setUserSearch] = useState('')
+  const [selectedPlatformIds, setSelectedPlatformIds] = useState<string[]>(defaultPlatformId ? [defaultPlatformId] : [])
+  const [platformDropdownOpen, setPlatformDropdownOpen] = useState(false)
+  const [platformSearch, setPlatformSearch] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Array of days for checkboxes
@@ -51,6 +54,26 @@ export default function TaskForm({
 
   const clearAllUsers = () => {
     setSelectedUserIds([])
+  }
+
+  // Filter platforms by search
+  const filteredPlatforms = platforms.filter(p => 
+    p.name.toLowerCase().includes(platformSearch.toLowerCase()) || 
+    p.pageName.toLowerCase().includes(platformSearch.toLowerCase())
+  )
+
+  const togglePlatform = (platformId: string) => {
+    setSelectedPlatformIds(prev => 
+      prev.includes(platformId) ? prev.filter(id => id !== platformId) : [...prev, platformId]
+    )
+  }
+
+  const selectAllPlatforms = () => {
+    setSelectedPlatformIds(platforms.map(p => p.id))
+  }
+
+  const clearAllPlatforms = () => {
+    setSelectedPlatformIds([])
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,11 +148,20 @@ export default function TaskForm({
       >
         {/* Hidden inputs for selected users */}
         {selectedUserIds.map(uid => (
-          <input key={uid} type="hidden" name="userIds" value={uid} />
+          <input key={`u-${uid}`} type="hidden" name="userIds" value={uid} />
         ))}
         {/* Legacy fallback */}
         {selectedUserIds.length > 0 && (
           <input type="hidden" name="userId" value={selectedUserIds[0]} />
+        )}
+
+        {/* Hidden inputs for selected platforms */}
+        {selectedPlatformIds.map(pid => (
+          <input key={`p-${pid}`} type="hidden" name="platformIds" value={pid} />
+        ))}
+        {/* Legacy fallback */}
+        {selectedPlatformIds.length > 0 && (
+          <input type="hidden" name="platformId" value={selectedPlatformIds[0]} />
         )}
 
         {/* Task Title */}
@@ -274,20 +306,152 @@ export default function TaskForm({
             )}
           </div>
 
-          {/* Platform Selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">ເພຈ/ຊ່ອງ (Platform) *</label>
-            <select
-              name="platformId"
-              defaultValue={defaultPlatformId || ''}
-              required
-              className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          {/* Multi-Platform Selector */}
+          <div className="relative">
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-medium text-gray-700">
+                ເພຈ/ຊ່ອງ (Platform) *
+              </label>
+              {selectedPlatformIds.length > 0 && (
+                <span className="text-xs bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">
+                  ເລືອກແລ້ວ {selectedPlatformIds.length} ເພຈ
+                </span>
+              )}
+            </div>
+
+            {/* Custom Multi-select trigger */}
+            <div 
+              onClick={() => setPlatformDropdownOpen(!platformDropdownOpen)}
+              className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 cursor-pointer hover:border-indigo-500 transition-colors flex items-center justify-between sm:text-sm min-h-[38px]"
             >
-              <option value="">-- ເລືອກເພຈ --</option>
-              {platforms.map(platform => (
-                <option key={platform.id} value={platform.id}>{platform.name} - {platform.pageName}</option>
-              ))}
-            </select>
+              <div className="flex-1 truncate">
+                {selectedPlatformIds.length === 0 ? (
+                  <span className="text-gray-400">-- ເລືອກເພຈ (ເລືອກໄດ້ຫຼາຍເພຈ) --</span>
+                ) : (
+                  <div className="flex flex-wrap gap-1">
+                    {selectedPlatformIds.slice(0, 3).map(id => {
+                      const p = platforms.find(platform => platform.id === id)
+                      return (
+                        <span key={id} className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded-md border border-indigo-200">
+                          {p?.logoUrl ? (
+                            <img src={p.logoUrl} className="w-3 h-3 rounded-full object-cover" alt="" />
+                          ) : (
+                            <span className="w-3 h-3 rounded-full bg-indigo-200 block" />
+                          )}
+                          {p?.pageName}
+                        </span>
+                      )
+                    })}
+                    {selectedPlatformIds.length > 3 && (
+                      <span className="text-xs text-gray-500 self-center">
+                        +{selectedPlatformIds.length - 3} ເພຈ
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <svg className={`w-4 h-4 text-gray-400 transition-transform ${platformDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {/* Dropdown Menu */}
+            {platformDropdownOpen && (
+              <div className="absolute z-20 mt-1 w-full bg-white rounded-xl shadow-xl border border-gray-200 p-3 space-y-2 animate-in fade-in zoom-in-95">
+                {/* Search & Actions */}
+                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <input
+                    type="text"
+                    value={platformSearch}
+                    onChange={e => setPlatformSearch(e.target.value)}
+                    placeholder="ຄົ້ນຫາເພຈ..."
+                    className="flex-1 px-2.5 py-1 text-xs border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500"
+                    onClick={e => e.stopPropagation()}
+                  />
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); selectAllPlatforms() }}
+                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                  >
+                    ທັງໝົດ
+                  </button>
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); clearAllPlatforms() }}
+                    className="text-xs text-gray-500 hover:text-gray-700 font-medium px-2 py-1 rounded bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    ລ້າງ
+                  </button>
+                </div>
+
+                {/* List of Platforms */}
+                <div className="max-h-64 overflow-y-auto space-y-1">
+                  {filteredPlatforms.length === 0 ? (
+                    <p className="text-xs text-gray-400 text-center py-3">ບໍ່ພົບເພຈ</p>
+                  ) : (
+                    filteredPlatforms.map(platform => {
+                      const isSelected = selectedPlatformIds.includes(platform.id)
+                      const pendingCount = platform._count?.tasks || 0
+                      return (
+                        <label
+                          key={platform.id}
+                          className={`flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition-colors text-sm ${
+                            isSelected ? 'bg-indigo-50/80 text-indigo-900 font-medium' : 'hover:bg-gray-50 text-gray-700'
+                          }`}
+                          onClick={e => e.stopPropagation()}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => togglePlatform(platform.id)}
+                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+                          />
+                          {platform.logoUrl ? (
+                            <img src={platform.logoUrl} className="w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200" alt="" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
+                              {platform.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="truncate font-semibold">{platform.pageName}</span>
+                              {pendingCount > 0 && (
+                                <span className="shrink-0 text-[10px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-md">
+                                  {pendingCount} ວຽກຄ້າງ
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                              <span className="truncate">{platform.name}</span>
+                              {platform.user?.name && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-indigo-600 font-medium flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                    {platform.user.name}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </label>
+                      )
+                    })
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-gray-100 text-right">
+                  <button
+                    type="button"
+                    onClick={() => setPlatformDropdownOpen(false)}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    ສຳເລັດ
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -44,7 +44,9 @@ export async function createTask(formData: FormData) {
 
   const title = formData.get('title') as string
   const description = (formData.get('description') as string) || null
-  const platformId = formData.get('platformId') as string
+  const platformIds = formData.getAll('platformIds') as string[]
+  const singlePlatformId = formData.get('platformId') as string
+  const targetPlatformIds = platformIds.length > 0 ? platformIds : (singlePlatformId ? [singlePlatformId] : [])
   const projectId = (formData.get('projectId') as string) || null
   const dateStr = formData.get('date') as string
   const timeStr = formData.get('time') as string
@@ -54,8 +56,8 @@ export async function createTask(formData: FormData) {
   const singleUserId = formData.get('userId') as string
   const targetUserIds = userIds.length > 0 ? userIds : (singleUserId ? [singleUserId] : [])
 
-  if (!title || targetUserIds.length === 0 || !platformId || !dateStr || !timeStr) {
-    return { error: 'ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ ແລະ ເລືອກພະນັກງານຢ່າງໜ້ອຍ 1 ຄົນ' }
+  if (!title || targetUserIds.length === 0 || targetPlatformIds.length === 0 || !dateStr || !timeStr) {
+    return { error: 'ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ ແລະ ເລືອກພະນັກງານ ແລະ ເພຈ ຢ່າງໜ້ອຍ 1 ລາຍການ' }
   }
   
   const dueDate = new Date(`${dateStr}T${timeStr}`)
@@ -64,17 +66,18 @@ export async function createTask(formData: FormData) {
   const files = formData.getAll('files') as File[]
   const savedAttachments = await processUploadedFiles(files)
 
-  // Create task for EACH selected employee
+  // Create task for EACH selected employee and EACH selected platform
   for (const userId of targetUserIds) {
-    const newTask = await prisma.task.create({
-      data: {
-        title,
-        description,
-        userId,
-        platformId,
-        projectId,
-        dueDate
-      },
+    for (const platformId of targetPlatformIds) {
+      const newTask = await prisma.task.create({
+        data: {
+          title,
+          description,
+          userId,
+          platformId,
+          projectId,
+          dueDate
+        },
       include: {
         user: true,
         platform: true
@@ -112,8 +115,8 @@ export async function createTask(formData: FormData) {
         link: '/employee'
       }
     })
-  }
-
+    } // End of platformId loop
+  } // End of userId loop
   revalidatePath('/admin/tasks')
   revalidatePath('/employee')
   redirect('/admin/tasks')

@@ -10,24 +10,34 @@ export async function createAutoTask(formData: FormData) {
   if (!session || session.userRole !== 'ADMIN') throw new Error('Unauthorized')
 
   const title = formData.get('title') as string
-  const userId = formData.get('userId') as string
-  const platformId = formData.get('platformId') as string
   const timeOfDay = formData.get('timeOfDay') as string
   const daysOfWeek = formData.getAll('daysOfWeek') as string[]
 
-  if (!title || !userId || !platformId || !timeOfDay || daysOfWeek.length === 0) {
-    return { error: 'Please fill all fields and select at least one day' }
+  const platformIds = formData.getAll('platformIds') as string[]
+  const singlePlatformId = formData.get('platformId') as string
+  const targetPlatformIds = platformIds.length > 0 ? platformIds : (singlePlatformId ? [singlePlatformId] : [])
+
+  const userIds = formData.getAll('userIds') as string[]
+  const singleUserId = formData.get('userId') as string
+  const targetUserIds = userIds.length > 0 ? userIds : (singleUserId ? [singleUserId] : [])
+
+  if (!title || targetUserIds.length === 0 || targetPlatformIds.length === 0 || !timeOfDay || daysOfWeek.length === 0) {
+    return { error: 'Please fill all fields and select at least one day, one user, and one platform' }
   }
 
-  await prisma.dailyTaskConfig.create({
-    data: {
-      title,
-      userId,
-      platformId,
-      timeOfDay,
-      daysOfWeek: daysOfWeek.join(',')
+  for (const userId of targetUserIds) {
+    for (const platformId of targetPlatformIds) {
+      await prisma.dailyTaskConfig.create({
+        data: {
+          title,
+          userId,
+          platformId,
+          timeOfDay,
+          daysOfWeek: daysOfWeek.join(',')
+        }
+      })
     }
-  })
+  }
 
   redirect('/admin/auto-tasks')
 }
