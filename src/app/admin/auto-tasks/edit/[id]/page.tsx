@@ -2,13 +2,20 @@ import { updateAutoTask } from '@/app/actions/auto-tasks'
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import PlatformSelect from '@/components/PlatformSelect'
 
 export default async function EditAutoTaskPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   const { id } = resolvedParams
 
   const users = await prisma.user.findMany({ where: { role: 'USER' } })
-  const platforms = await prisma.platform.findMany()
+  const platforms = await prisma.platform.findMany({
+    include: {
+      user: {
+        select: { id: true, name: true }
+      }
+    }
+  })
 
   const config = await prisma.dailyTaskConfig.findUnique({
     where: { id }
@@ -65,17 +72,7 @@ export default async function EditAutoTaskPage({ params }: { params: Promise<{ i
 
           <div>
             <label className="block text-sm font-medium text-gray-700">ເພຈ/ຊ່ອງທາງ (Platform)</label>
-            <select
-              name="platformId"
-              required
-              defaultValue={config.platformId}
-              className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            >
-              <option value="">-- ເລືອກເພຈ --</option>
-              {platforms.map(platform => (
-                <option key={platform.id} value={platform.id}>{platform.name} - {platform.pageName}</option>
-              ))}
-            </select>
+            <PlatformSelect platforms={platforms} defaultValue={config.platformId} />
           </div>
 
           <div>

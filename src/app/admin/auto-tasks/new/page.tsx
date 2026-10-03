@@ -1,10 +1,17 @@
 import { createAutoTask } from '@/app/actions/auto-tasks'
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
+import PlatformSelect from '@/components/PlatformSelect'
 
 export default async function NewAutoTaskPage() {
   const users = await prisma.user.findMany({ where: { role: 'USER' } })
-  const platforms = await prisma.platform.findMany()
+  const platforms = await prisma.platform.findMany({
+    include: {
+      user: {
+        select: { id: true, name: true }
+      }
+    }
+  })
 
   return (
     <div>
@@ -47,16 +54,7 @@ export default async function NewAutoTaskPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">ເພຈ/ຊ່ອງ (Platform)</label>
-            <select
-              name="platformId"
-              required
-              className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            >
-              <option value="">-- ເລືອກເພຈ --</option>
-              {platforms.map(platform => (
-                <option key={platform.id} value={platform.id}>{platform.name} - {platform.pageName}</option>
-              ))}
-            </select>
+            <PlatformSelect platforms={platforms} />
           </div>
 
           <div>
